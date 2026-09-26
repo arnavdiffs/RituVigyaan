@@ -12,19 +12,69 @@ export default function PhoneMockup({ latestAlert, activePhoneDelivery }) {
     }
   }, []);
 
-  const handleSpeak = (text) => {
+  const fallbackSpeech = (text, lang) => {
     if (!speechSupported || !text) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 0.9;
     utterance.pitch = 1.0;
-    utterance.lang = 'hi-IN';
-
+    utterance.lang = lang === 'mr' ? 'mr-IN' : (lang === 'pa' ? 'pa-IN' : 'hi-IN');
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = () => setIsSpeaking(false);
-
     window.speechSynthesis.speak(utterance);
+  };
+
+  const handleSpeak = async (delivery) => {
+    if (!delivery) return;
+    const text = delivery.message;
+    const lang = delivery.language || 'mr';
+    let audioUrl = delivery.audio_url;
+
+    // 1. If not yet pre-generated, attempt to fetch from Sarvam TTS API
+    if (!audioUrl) {
+      try {
+        const resp = await fetch('/api/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: text,
+            language: lang,
+            delivery_id: delivery.farmer_id || delivery.id
+          })
+        });
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data.audio_url) {
+            audioUrl = data.audio_url;
+            delivery.audio_url = audioUrl;
+          }
+        }
+      } catch (err) {
+        console.warn('Sarvam TTS API request failed, falling back:', err);
+      }
+    }
+
+    // 2. Play real Sarvam audio if available
+    if (audioUrl) {
+      try {
+        setIsSpeaking(true);
+        const audio = new Audio(audioUrl);
+        audio.onended = () => setIsSpeaking(false);
+        audio.onerror = () => {
+          setIsSpeaking(false);
+          fallbackSpeech(text, lang);
+        };
+        await audio.play();
+        return;
+      } catch (playErr) {
+        console.warn('Audio play error, falling back:', playErr);
+        setIsSpeaking(false);
+      }
+    }
+
+    // 3. Fallback to SpeechSynthesis
+    fallbackSpeech(text, lang);
   };
 
   const currentDelivery = activePhoneDelivery || (latestAlert?.deliveries && latestAlert.deliveries[0]);
@@ -101,10 +151,11 @@ export default function PhoneMockup({ latestAlert, activePhoneDelivery }) {
               {currentDelivery ? (
                 <>
                   <button
-                    onClick={() => handleSpeak(currentDelivery.message)}
+                    onClick={() => handleSpeak(currentDelivery)}
+                    disabled={isSpeaking}
                     className="hover:underline flex items-center gap-0.5 text-white font-medium"
                   >
-                    <Volume2 className="w-3 h-3 text-[#F3EEE4]" /> Voice IVR
+                    <Volume2 className={`w-3 h-3 ${isSpeaking ? 'text-[#B8860B] animate-pulse' : 'text-[#F3EEE4]'}`} /> {isSpeaking ? 'Playing Audio...' : 'Voice IVR'}
                   </button>
                   <span className="text-[#8A8071] font-medium">DISMISS</span>
                 </>
@@ -165,10 +216,11 @@ export default function PhoneMockup({ latestAlert, activePhoneDelivery }) {
                 <div className="flex items-center justify-between text-[10px] text-[#8A8071] border-t border-[#E4DDCC] pt-1.5">
                   <span className="font-medium text-[#9C3B2E]">Urgency: {currentDelivery.urgency}</span>
                   <button
-                    onClick={() => handleSpeak(currentDelivery.message)}
+                    onClick={() => handleSpeak(currentDelivery)}
+                    disabled={isSpeaking}
                     className="flex items-center gap-1 bg-[#2C1B3F] text-[#F3EEE4] hover:bg-[#1f132c] px-2 py-0.5 rounded-none font-medium"
                   >
-                    <Volume2 className="w-3 h-3 text-[#F3EEE4]" /> Speak
+                    <Volume2 className={`w-3 h-3 ${isSpeaking ? 'text-[#B8860B] animate-pulse' : 'text-[#F3EEE4]'}`} /> {isSpeaking ? 'Playing...' : 'Speak'}
                   </button>
                 </div>
               </div>

@@ -4,6 +4,7 @@ from typing import List, Dict, Any, Optional
 from server.database import get_connection
 from server.services.geo import is_within_radius, haversine_distance
 from server.services.vulnerability import evaluate_crop_risk, generate_alert_message
+from server.services.sarvam import generate_sarvam_tts
 
 # In-memory buffer for real-time live alert feed on the dashboard
 LATEST_DISPATCH: Dict[str, Any] = {
@@ -147,12 +148,17 @@ async def dispatch_fire_and_forget_alert(
     
     alert_id = cursor.lastrowid
 
-    # 3. Persist deliveries
+    # 3. Persist deliveries and generate Sarvam TTS audio
     for d in deliveries_to_record:
+        try:
+            d["audio_url"] = await generate_sarvam_tts(d["message"], d["language"], d["farmer_id"])
+        except Exception:
+            d["audio_url"] = None
+
         cursor.execute("""
-        INSERT INTO alert_deliveries (alert_id, farmer_id, channel, message, urgency, distance_km, status, delivered_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (alert_id, d["farmer_id"], d["channel"], d["message"], d["urgency"], d["distance_km"], d["status"], d["delivered_at"]))
+        INSERT INTO alert_deliveries (alert_id, farmer_id, channel, message, urgency, distance_km, status, delivered_at, audio_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (alert_id, d["farmer_id"], d["channel"], d["message"], d["urgency"], d["distance_km"], d["status"], d["delivered_at"], d.get("audio_url")))
 
     conn.commit()
     conn.close()

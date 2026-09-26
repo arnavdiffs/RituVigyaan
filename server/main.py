@@ -34,6 +34,12 @@ DIST_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "client
 if os.path.exists(DIST_DIR):
     app.mount("/assets", StaticFiles(directory=os.path.join(DIST_DIR, "assets")), name="assets")
 
+AUDIO_CACHE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "audio_cache"))
+os.makedirs(AUDIO_CACHE_DIR, exist_ok=True)
+app.mount("/api/audio", StaticFiles(directory=AUDIO_CACHE_DIR), name="audio")
+
+from server.services.sarvam import generate_sarvam_tts
+
 @app.on_event("startup")
 def on_startup():
     init_db()
@@ -287,3 +293,14 @@ async def get_tower_live_weather(tower_id: int):
         "radius_km": t["radius_km"],
         "weather": weather
     }
+
+@app.post("/api/tts")
+async def create_tts(payload: Dict[str, Any]):
+    text = payload.get("text", "")
+    language = payload.get("language", "hi")
+    delivery_id = payload.get("delivery_id")
+    url = await generate_sarvam_tts(text, language, delivery_id)
+    if not url:
+        return {"audio_url": None, "source": "fallback", "error": "SARVAM_API_KEY not configured or API call failed"}
+    return {"audio_url": url, "source": "sarvam"}
+

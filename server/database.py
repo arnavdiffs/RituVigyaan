@@ -62,6 +62,11 @@ def init_db():
     except Exception:
         pass
 
+    try:
+        cursor.execute("ALTER TABLE alert_deliveries ADD COLUMN audio_url TEXT")
+    except Exception:
+        pass
+
     # Alert Events table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS alerts (
