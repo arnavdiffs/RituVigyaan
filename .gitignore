@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.py[cod]
+*$py.class
+server/venv/
+server/audio_cache/
+*.db
+krishi.db
+
+# Secrets & Environment
+.env
+*.env
+
+# Node
+node_modules/
+client/node_modules/
+.npm
+.DS_Store
+
+# Logs
+*.log
+
+.git_krishi_backup/
