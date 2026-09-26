@@ -7,24 +7,32 @@ export default {
   theme: {
     extend: {
       colors: {
-        krishi: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          500: '#22c55e',
-          600: '#16a34a',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
+        cream: '#F3EEE4',
+        panel: '#FFFFFF',
+        plum: {
+          DEFAULT: '#2C1B3F',
+          dark: '#1F122D',
+          light: '#3D2856',
         },
-        amber: {
-          DEFAULT: '#f59e0b',
-          glow: '#ff9900',
-        }
+        hairline: '#E4DDCC',
+        dim: '#8A8071',
+        brick: {
+          DEFAULT: '#9C3B2E',
+          dark: '#822E22',
+        },
+        gold: {
+          DEFAULT: '#B8860B',
+          dark: '#996F08',
+        },
+        sage: {
+          DEFAULT: '#4B7A63',
+          dark: '#3D6351',
+        },
       },
-      animation: {
-        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'ping-slow': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
-      }
+      fontFamily: {
+        serif: ['"Fraunces"', 'Georgia', 'serif'],
+        sans: ['"IBM Plex Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+      },
     },
   },
   plugins: [],

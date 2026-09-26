@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Smartphone, Volume2, VolumeX, AlertTriangle, CheckCircle, BellRing, PhoneCall } from 'lucide-react';
+import { Smartphone, Volume2, AlertTriangle } from 'lucide-react';
 
 export default function PhoneMockup({ latestAlert, activePhoneDelivery }) {
   const [deviceType, setDeviceType] = useState('feature'); // 'feature' or 'smart'
@@ -18,8 +18,6 @@ export default function PhoneMockup({ latestAlert, activePhoneDelivery }) {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 0.9;
     utterance.pitch = 1.0;
-    
-    // Choose appropriate lang if available
     utterance.lang = 'hi-IN';
 
     utterance.onstart = () => setIsSpeaking(true);
@@ -32,22 +30,23 @@ export default function PhoneMockup({ latestAlert, activePhoneDelivery }) {
   const currentDelivery = activePhoneDelivery || (latestAlert?.deliveries && latestAlert.deliveries[0]);
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col items-center">
-      <div className="w-full flex items-center justify-between mb-3 border-b border-slate-800 pb-2">
+    <div className="bg-white border border-[#E4DDCC] rounded-none shadow-none p-4 flex flex-col items-center">
+      {/* Header */}
+      <div className="w-full flex items-center justify-between mb-3 border-b border-[#E4DDCC] pb-2">
         <div className="flex items-center space-x-2">
-          <Smartphone className="w-4 h-4 text-amber-400" />
-          <h2 className="text-sm font-semibold text-slate-200">Live Farmer Phone Simulator</h2>
+          <Smartphone className="w-4 h-4 text-[#2C1B3F]" />
+          <h2 className="font-serif font-semibold text-sm text-[#2C1B3F]">Farmer Phone Simulator</h2>
         </div>
-        <div className="flex items-center bg-slate-800 rounded-lg p-0.5 text-xs">
+        <div className="flex items-center bg-[#F3EEE4] border border-[#E4DDCC] rounded-none p-0.5 text-xs">
           <button
             onClick={() => setDeviceType('feature')}
-            className={`px-2 py-1 rounded ${deviceType === 'feature' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
+            className={`px-2 py-1 rounded-none text-xs transition ${deviceType === 'feature' ? 'bg-[#2C1B3F] text-[#F3EEE4] font-medium' : 'text-[#2C1B3F] hover:bg-white'}`}
           >
             Feature Phone (Class 0)
           </button>
           <button
             onClick={() => setDeviceType('smart')}
-            className={`px-2 py-1 rounded ${deviceType === 'smart' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
+            className={`px-2 py-1 rounded-none text-xs transition ${deviceType === 'smart' ? 'bg-[#2C1B3F] text-[#F3EEE4] font-medium' : 'text-[#2C1B3F] hover:bg-white'}`}
           >
             Smartphone
           </button>
@@ -55,17 +54,17 @@ export default function PhoneMockup({ latestAlert, activePhoneDelivery }) {
       </div>
 
       {deviceType === 'feature' ? (
-        /* Classic Rural Feature Phone (JioBharat / Nokia style) */
-        <div className="relative w-64 bg-slate-800 rounded-3xl p-3 shadow-2xl border-4 border-slate-700 flex flex-col items-center">
-          {/* Earpiece speaker */}
-          <div className="w-12 h-1.5 bg-slate-600 rounded-full mb-3"></div>
+        /* Flat Rural Feature Phone (JioBharat / Nokia style) */
+        <div className="relative w-64 bg-[#2C1B3F] border border-[#1f132c] rounded-none p-3 shadow-none flex flex-col items-center">
+          {/* Earpiece slot */}
+          <div className="w-12 h-1 bg-[#1f132c] mb-3"></div>
 
           {/* Screen */}
-          <div className="w-full h-64 bg-[#2b3a2a] rounded-lg border-2 border-slate-600 p-2.5 flex flex-col justify-between font-mono text-xs text-white relative overflow-hidden shadow-inner">
+          <div className="w-full h-64 bg-[#1a1025] border border-[#3c2854] rounded-none p-2.5 flex flex-col justify-between font-mono text-xs text-[#F3EEE4] relative overflow-hidden shadow-none">
             {/* Status bar */}
-            <div className="flex justify-between items-center text-[10px] text-[#9df28f] border-b border-[#3e563d] pb-1">
+            <div className="flex justify-between items-center text-[10px] text-[#F3EEE4] border-b border-[#3c2854] pb-1">
               <span className="font-bold flex items-center gap-1">
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
+                <span className="inline-block w-1.5 h-1.5 bg-[#9C3B2E]"></span>
                 TOWER 4G
               </span>
               <span>100% 🔋</span>
@@ -73,39 +72,41 @@ export default function PhoneMockup({ latestAlert, activePhoneDelivery }) {
 
             {/* Content Area */}
             {currentDelivery ? (
-              <div className="my-auto bg-amber-500/20 border border-amber-400/50 p-2 rounded animate-pulse-fast">
-                <div className="flex items-center justify-between text-amber-300 font-bold text-[10px] mb-1">
-                  <span className="bg-red-600 text-white px-1 rounded animate-bounce">⚡ AMBER ALERT</span>
-                  <span className="text-[9px] text-amber-200">
-                    {currentDelivery.channel.includes('MANDI') ? 'TIER 2: CELL BROADCAST' : 'TIER 1: FLASH SMS'}
+              <div className="my-auto bg-[#2C1B3F] border border-[#E4DDCC] p-2 rounded-none">
+                <div className="flex items-center justify-between text-[#F3EEE4] font-bold text-[10px] mb-1">
+                  <span className="bg-[#9C3B2E] text-white px-1 py-0.5 rounded-none font-sans font-bold">
+                    AMBER ALERT
+                  </span>
+                  <span className="text-[9px] text-[#E4DDCC]">
+                    {currentDelivery.channel.includes('MANDI') ? 'CELL BROADCAST' : 'FLASH SMS'}
                   </span>
                 </div>
-                <div className="text-[11px] font-sans font-semibold text-white leading-tight mb-2">
+                <div className="text-[11px] font-sans font-medium text-white leading-tight mb-2">
                   {currentDelivery.message}
                 </div>
-                <div className="text-[9px] text-[#9df28f] flex justify-between border-t border-[#3e563d] pt-1">
+                <div className="text-[9px] text-[#F3EEE4] flex justify-between border-t border-[#3c2854] pt-1 font-sans">
                   <span>To: {currentDelivery.farmer_name}</span>
-                  <span>Crop: {currentDelivery.crop} ({currentDelivery.crop_stage})</span>
+                  <span>{currentDelivery.crop} ({currentDelivery.crop_stage})</span>
                 </div>
               </div>
             ) : (
-              <div className="text-center my-auto text-[#7da678] text-[11px]">
+              <div className="text-center my-auto text-[#F3EEE4] text-[11px] font-sans">
                 <p>No active storm alert.</p>
-                <p className="text-[9px] mt-1 text-[#5c8058]">Standby for tower broadcast...</p>
+                <p className="text-[9px] mt-1 text-[#8A8071]">Standby for tower broadcast...</p>
               </div>
             )}
 
             {/* Softkeys */}
-            <div className="flex justify-between text-[10px] text-[#9df28f] border-t border-[#3e563d] pt-1">
+            <div className="flex justify-between text-[10px] text-[#F3EEE4] border-t border-[#3c2854] pt-1">
               {currentDelivery ? (
                 <>
                   <button
                     onClick={() => handleSpeak(currentDelivery.message)}
-                    className="hover:underline flex items-center gap-0.5 text-amber-300"
+                    className="hover:underline flex items-center gap-0.5 text-white font-medium"
                   >
-                    <Volume2 className="w-3 h-3" /> Voice IVR
+                    <Volume2 className="w-3 h-3 text-[#F3EEE4]" /> Voice IVR
                   </button>
-                  <span className="text-slate-400 font-bold">DISMISS</span>
+                  <span className="text-[#8A8071] font-medium">DISMISS</span>
                 </>
               ) : (
                 <>
@@ -119,75 +120,75 @@ export default function PhoneMockup({ latestAlert, activePhoneDelivery }) {
           {/* D-Pad & Keypad */}
           <div className="w-full mt-3 px-2">
             {/* D-pad */}
-            <div className="w-12 h-12 mx-auto rounded-full bg-slate-700 border-2 border-slate-600 flex items-center justify-center mb-2">
-              <div className="w-6 h-6 rounded-full bg-slate-600 border border-slate-500"></div>
+            <div className="w-10 h-10 mx-auto rounded-none bg-[#1a1025] border border-[#3c2854] flex items-center justify-center mb-2">
+              <div className="w-5 h-5 bg-[#2C1B3F] border border-[#3c2854]"></div>
             </div>
             {/* 12 Keypad Grid */}
-            <div className="grid grid-cols-3 gap-1.5 text-center text-[10px] font-bold text-slate-300">
-              <div className="bg-slate-700/80 py-1 rounded">1</div>
-              <div className="bg-slate-700/80 py-1 rounded">2</div>
-              <div className="bg-slate-700/80 py-1 rounded">3</div>
-              <div className="bg-slate-700/80 py-1 rounded">4</div>
-              <div className="bg-slate-700/80 py-1 rounded">5</div>
-              <div className="bg-slate-700/80 py-1 rounded">6</div>
-              <div className="bg-slate-700/80 py-1 rounded">7</div>
-              <div className="bg-slate-700/80 py-1 rounded">8</div>
-              <div className="bg-slate-700/80 py-1 rounded">9</div>
-              <div className="bg-slate-700/80 py-1 rounded">*</div>
-              <div className="bg-slate-700/80 py-1 rounded">0</div>
-              <div className="bg-slate-700/80 py-1 rounded">#</div>
+            <div className="grid grid-cols-3 gap-1 text-center text-[10px] font-bold text-[#F3EEE4]">
+              <div className="bg-[#1a1025] border border-[#3c2854] py-1 rounded-none">1</div>
+              <div className="bg-[#1a1025] border border-[#3c2854] py-1 rounded-none">2</div>
+              <div className="bg-[#1a1025] border border-[#3c2854] py-1 rounded-none">3</div>
+              <div className="bg-[#1a1025] border border-[#3c2854] py-1 rounded-none">4</div>
+              <div className="bg-[#1a1025] border border-[#3c2854] py-1 rounded-none">5</div>
+              <div className="bg-[#1a1025] border border-[#3c2854] py-1 rounded-none">6</div>
+              <div className="bg-[#1a1025] border border-[#3c2854] py-1 rounded-none">7</div>
+              <div className="bg-[#1a1025] border border-[#3c2854] py-1 rounded-none">8</div>
+              <div className="bg-[#1a1025] border border-[#3c2854] py-1 rounded-none">9</div>
+              <div className="bg-[#1a1025] border border-[#3c2854] py-1 rounded-none">*</div>
+              <div className="bg-[#1a1025] border border-[#3c2854] py-1 rounded-none">0</div>
+              <div className="bg-[#1a1025] border border-[#3c2854] py-1 rounded-none">#</div>
             </div>
           </div>
         </div>
       ) : (
-        /* Modern Smartphone View */
-        <div className="relative w-64 h-[440px] bg-slate-950 rounded-[36px] p-2.5 shadow-2xl border-4 border-slate-700 flex flex-col justify-between overflow-hidden">
-          {/* Notch */}
-          <div className="w-20 h-4 bg-slate-800 rounded-full mx-auto mb-1"></div>
+        /* Modern Flat Smartphone View */
+        <div className="relative w-64 h-[440px] bg-[#2C1B3F] border border-[#1f132c] rounded-none p-2 shadow-none flex flex-col justify-between overflow-hidden">
+          {/* Top Notch slot */}
+          <div className="w-16 h-1 bg-[#1f132c] mx-auto mb-1"></div>
 
           {/* Screen Content */}
-          <div className="flex-1 bg-slate-900 rounded-2xl p-3 flex flex-col justify-between border border-slate-800 relative">
-            <div className="flex justify-between text-[10px] text-slate-400">
-              <span>Jio / Airtel 5G</span>
+          <div className="flex-1 bg-white border border-[#E4DDCC] rounded-none p-3 flex flex-col justify-between relative text-[#2C1B3F]">
+            <div className="flex justify-between text-[10px] text-[#8A8071] font-mono">
+              <span>Jio / Airtel 4G</span>
               <span>12:00</span>
             </div>
 
             {currentDelivery ? (
-              <div className="bg-red-950/80 border-2 border-red-500 rounded-xl p-3 shadow-lg my-auto animate-pulse">
-                <div className="flex items-center space-x-1.5 text-red-400 text-xs font-bold mb-1">
-                  <AlertTriangle className="w-4 h-4 text-red-500 animate-bounce" />
+              <div className="border-l-4 border-[#9C3B2E] bg-[#F3EEE4] border-t border-r border-b border-[#E4DDCC] rounded-none p-3 my-auto">
+                <div className="flex items-center space-x-1.5 text-[#9C3B2E] text-xs font-bold mb-1">
+                  <AlertTriangle className="w-3.5 h-3.5" />
                   <span>EMERGENCY BROADCAST</span>
                 </div>
-                <div className="text-xs font-medium text-white mb-2 leading-snug">
+                <div className="text-xs font-medium text-[#2C1B3F] mb-2 leading-snug">
                   {currentDelivery.message}
                 </div>
-                <div className="flex items-center justify-between text-[10px] text-slate-300 border-t border-red-800/60 pt-1.5">
-                  <span>Urgency: {currentDelivery.urgency}</span>
+                <div className="flex items-center justify-between text-[10px] text-[#8A8071] border-t border-[#E4DDCC] pt-1.5">
+                  <span className="font-medium text-[#9C3B2E]">Urgency: {currentDelivery.urgency}</span>
                   <button
                     onClick={() => handleSpeak(currentDelivery.message)}
-                    className="flex items-center gap-1 bg-red-800/80 hover:bg-red-700 text-white px-2 py-0.5 rounded"
+                    className="flex items-center gap-1 bg-[#2C1B3F] text-[#F3EEE4] hover:bg-[#1f132c] px-2 py-0.5 rounded-none font-medium"
                   >
-                    <Volume2 className="w-3 h-3" /> Speak
+                    <Volume2 className="w-3 h-3 text-[#F3EEE4]" /> Speak
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="text-center my-auto text-slate-500 text-xs">
-                <p>Cell Broadcast Active</p>
-                <p className="text-[10px] text-slate-600 mt-1">Listening on Channel 919...</p>
+              <div className="text-center my-auto text-[#8A8071] text-xs">
+                <p className="font-serif text-[#2C1B3F]">Cell Broadcast Active</p>
+                <p className="text-[10px] text-[#8A8071] mt-1">Channel 919 Standby...</p>
               </div>
             )}
 
-            {/* Bottom Bar */}
-            <div className="w-24 h-1 bg-slate-600 rounded-full mx-auto mt-2"></div>
+            {/* Bottom Indicator */}
+            <div className="w-20 h-1 bg-[#E4DDCC] mx-auto mt-2"></div>
           </div>
         </div>
       )}
 
       {currentDelivery && (
-        <div className="mt-3 text-center text-xs text-slate-400">
-          <p className="text-slate-300 font-medium">Viewing Alert for: <span className="text-amber-400">{currentDelivery.farmer_name}</span></p>
-          <p className="text-[11px] text-slate-500">{currentDelivery.village} • {currentDelivery.distance_km} km from tower</p>
+        <div className="mt-3 text-center text-xs text-[#8A8071]">
+          <p className="text-[#2C1B3F] font-medium">Viewing Alert for: <strong className="text-[#2C1B3F]">{currentDelivery.farmer_name}</strong></p>
+          <p className="text-[11px] text-[#8A8071]">{currentDelivery.village} • {currentDelivery.distance_km} km from tower</p>
         </div>
       )}
     </div>
