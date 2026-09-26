@@ -151,7 +151,8 @@ async def dispatch_fire_and_forget_alert(
     # 3. Persist deliveries and generate Sarvam TTS audio
     for d in deliveries_to_record:
         try:
-            d["audio_url"] = await generate_sarvam_tts(d["message"], d["language"], d["farmer_id"])
+            url, _ = await generate_sarvam_tts(d["message"], d["language"], d["farmer_id"])
+            d["audio_url"] = url
         except Exception:
             d["audio_url"] = None
 

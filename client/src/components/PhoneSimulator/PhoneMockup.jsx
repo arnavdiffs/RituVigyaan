@@ -5,6 +5,8 @@ export default function PhoneMockup({ latestAlert, activePhoneDelivery }) {
   const [deviceType, setDeviceType] = useState('feature'); // 'feature' or 'smart'
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
+  const [audioSource, setAudioSource] = useState(null); // 'SARVAM' or 'BROWSER_FALLBACK'
+  const [sarvamError, setSarvamError] = useState(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -12,7 +14,14 @@ export default function PhoneMockup({ latestAlert, activePhoneDelivery }) {
     }
   }, []);
 
-  const fallbackSpeech = (text, lang) => {
+  const fallbackSpeech = (text, lang, errorDetail = null) => {
+    setAudioSource('BROWSER_FALLBACK');
+    if (errorDetail) {
+      setSarvamError(errorDetail);
+      console.warn('[TTS Mode: BROWSER_FALLBACK] Reason:', errorDetail);
+    } else {
+      console.log('[TTS Mode: BROWSER_FALLBACK] Browser SpeechSynthesis active');
+    }
     if (!speechSupported || !text) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
@@ -30,10 +39,12 @@ export default function PhoneMockup({ latestAlert, activePhoneDelivery }) {
     const text = delivery.message;
     const lang = delivery.language || 'mr';
     let audioUrl = delivery.audio_url;
+    setSarvamError(null);
 
-    // 1. If not yet pre-generated, attempt to fetch from Sarvam TTS API
+    // 1. Fetch from Sarvam TTS API if not pre-generated
     if (!audioUrl) {
       try {
+        console.log(`[TTS] Requesting Sarvam Bulbul:v3 synthesis (${lang})...`);
         const resp = await fetch('/api/tts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -43,37 +54,55 @@ export default function PhoneMockup({ latestAlert, activePhoneDelivery }) {
             delivery_id: delivery.farmer_id || delivery.id
           })
         });
+
         if (resp.ok) {
           const data = await resp.json();
-          if (data.audio_url) {
+          if (data.source === 'SARVAM' && data.audio_url) {
             audioUrl = data.audio_url;
             delivery.audio_url = audioUrl;
+            console.log('[TTS Mode: SARVAM] Audio successfully generated:', audioUrl);
+          } else {
+            console.error('[TTS Mode: SARVAM Failed]', data.error);
+            fallbackSpeech(text, lang, data.error);
+            return;
           }
+        } else {
+          const errText = await resp.text();
+          console.error('[TTS Mode: /api/tts HTTP Error]', errText);
+          fallbackSpeech(text, lang, `HTTP ${resp.status}: ${errText}`);
+          return;
         }
       } catch (err) {
-        console.warn('Sarvam TTS API request failed, falling back:', err);
+        console.error('[TTS Mode: Network Error]', err);
+        fallbackSpeech(text, lang, err.message);
+        return;
       }
     }
 
-    // 2. Play real Sarvam audio if available
+    // 2. Play real Sarvam audio stream
     if (audioUrl) {
       try {
+        setAudioSource('SARVAM');
         setIsSpeaking(true);
+        console.log('[TTS Mode: SARVAM] Playing audio via HTML5 Audio element:', audioUrl);
         const audio = new Audio(audioUrl);
         audio.onended = () => setIsSpeaking(false);
-        audio.onerror = () => {
+        audio.onerror = (e) => {
           setIsSpeaking(false);
-          fallbackSpeech(text, lang);
+          console.error('[TTS Mode: Audio Element Error]', e);
+          fallbackSpeech(text, lang, 'Audio stream failed to decode in browser');
         };
         await audio.play();
         return;
       } catch (playErr) {
-        console.warn('Audio play error, falling back:', playErr);
+        console.error('[TTS Mode: Play Exception]', playErr);
         setIsSpeaking(false);
+        fallbackSpeech(text, lang, playErr.message);
+        return;
       }
     }
 
-    // 3. Fallback to SpeechSynthesis
+    // 3. Fallback
     fallbackSpeech(text, lang);
   };
 
@@ -86,6 +115,11 @@ export default function PhoneMockup({ latestAlert, activePhoneDelivery }) {
         <div className="flex items-center space-x-2">
           <Smartphone className="w-4 h-4 text-[#2C1B3F]" />
           <h2 className="font-serif font-semibold text-sm text-[#2C1B3F]">Farmer Phone Simulator</h2>
+          {audioSource && (
+            <span className={`text-[9px] font-mono px-1.5 py-0.5 border ${audioSource === 'SARVAM' ? 'bg-[#4B7A63] text-white border-[#4B7A63]' : 'bg-[#9C3B2E] text-white border-[#9C3B2E]'}`}>
+              {audioSource === 'SARVAM' ? '● SARVAM (BULBUL-V3)' : '● BROWSER_FALLBACK'}
+            </span>
+          )}
         </div>
         <div className="flex items-center bg-[#F3EEE4] border border-[#E4DDCC] rounded-none p-0.5 text-xs">
           <button
@@ -102,6 +136,12 @@ export default function PhoneMockup({ latestAlert, activePhoneDelivery }) {
           </button>
         </div>
       </div>
+
+      {sarvamError && (
+        <div className="w-full bg-[#F3EEE4] border border-[#9C3B2E] text-[#9C3B2E] text-[10px] p-2 font-mono mb-2">
+          <strong>Sarvam Error:</strong> {sarvamError}
+        </div>
+      )}
 
       {deviceType === 'feature' ? (
         /* Flat Rural Feature Phone (JioBharat / Nokia style) */

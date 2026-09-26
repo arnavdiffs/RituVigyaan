@@ -299,8 +299,8 @@ async def create_tts(payload: Dict[str, Any]):
     text = payload.get("text", "")
     language = payload.get("language", "hi")
     delivery_id = payload.get("delivery_id")
-    url = await generate_sarvam_tts(text, language, delivery_id)
+    url, err = await generate_sarvam_tts(text, language, delivery_id)
     if not url:
-        return {"audio_url": None, "source": "fallback", "error": "SARVAM_API_KEY not configured or API call failed"}
-    return {"audio_url": url, "source": "sarvam"}
+        return {"audio_url": None, "source": "BROWSER_FALLBACK", "error": err or "SARVAM_API_KEY not configured or API call failed"}
+    return {"audio_url": url, "source": "SARVAM"}
 
